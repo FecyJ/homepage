@@ -19,6 +19,8 @@
 
 [📚 阅读完整文档](https://docs.mizuki.mysqil.com/) →
 
+基于本仓库搭建个人站点时，可先阅读 [个人站点维护指南](./docs/MAINTENANCE.md)。
+
 ![Mizuki Preview](./README.webp)
 
 <table>

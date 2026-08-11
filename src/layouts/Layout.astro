@@ -57,6 +57,13 @@ let {
 // why doing this in Layout instead of GlobalStyles: https://github.com/withastro/astro/issues/6728#issuecomment-1502203757
 const configHue = siteConfig.themeColor.hue;
 const customFontsEnabled = resolveFontMode(siteConfig) === "custom";
+// Astro derives this prop from the active font config. In system mode the
+// generated type is `never`, although these components are not rendered.
+const customFontVariables = {
+	body: "--font-body" as never,
+	cjk: "--font-cjk" as never,
+	mono: "--font-jetbrains-mono" as never,
+};
 
 // 获取导航栏透明模式配置
 const navbarTransparentMode =
@@ -163,9 +170,9 @@ const bannerOffset =
 			@layer properties, theme, base, components, utilities;
 		</style>
 
-		{customFontsEnabled && <Font cssVariable="--font-body" preload />}
-		{customFontsEnabled && <Font cssVariable="--font-cjk" />}
-		{customFontsEnabled && <Font cssVariable="--font-jetbrains-mono" />}
+		{customFontsEnabled && <Font cssVariable={customFontVariables.body} preload />}
+		{customFontsEnabled && <Font cssVariable={customFontVariables.cjk} />}
+		{customFontsEnabled && <Font cssVariable={customFontVariables.mono} />}
 
 		<script is:inline>
 			(function() {
@@ -190,9 +197,13 @@ const bannerOffset =
 		</script>
 
 		<!-- 第三方分析脚本 -->
-		<AnalyticsScripts
-			thirdPartyAnalytics={siteConfig.thirdPartyAnalytics}
-		/>
+		{
+			siteConfig.thirdPartyAnalytics?.enable && (
+				<AnalyticsScripts
+					thirdPartyAnalytics={siteConfig.thirdPartyAnalytics}
+				/>
+			)
+		}
 
 		<!-- SEO Meta Tags, Open Graph, Twitter Card, Favicons, Theme Init -->
 		<HeadTags
@@ -229,13 +240,19 @@ const bannerOffset =
 
 		data-overlayscrollbars-initialize
 	>
-		<noscript
-			><iframe
-				src="https://www.googletagmanager.com/ns.html?id=GTM-KRX3XGVH"
-				height="0"
-				width="0"
-				style="display:none;visibility:hidden"></iframe></noscript
-		>
+		{
+			siteConfig.thirdPartyAnalytics?.enable &&
+				siteConfig.thirdPartyAnalytics.gtmId && (
+					<noscript>
+						<iframe
+							src={`https://www.googletagmanager.com/ns.html?id=${siteConfig.thirdPartyAnalytics.gtmId}`}
+							height="0"
+							width="0"
+							style="display:none;visibility:hidden"
+						/>
+					</noscript>
+				)
+		}
 		<!-- 页面顶部渐变高光效果 - 只在full和semifull模式下显示 -->
 		{shouldShowTopHighlight && <div class="top-gradient-highlight" />}
 

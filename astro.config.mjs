@@ -21,6 +21,7 @@ import remarkDirective from "remark-directive";
 import remarkMath from "remark-math";
 import remarkSectionize from "remark-sectionize";
 
+import { loadEnv } from "./scripts/load-env.js";
 import {
 	expressiveCodeConfig,
 	markdownConfig,
@@ -48,6 +49,8 @@ import { remarkMermaid } from "./src/plugins/remark-mermaid.js";
 import { remarkPlantuml } from "./src/plugins/remark-plantuml.mjs";
 import { remarkWikiLink } from "./src/plugins/remark-wiki-link.mjs";
 import { resolveFontMode } from "./src/utils/fontMode.ts";
+
+loadEnv();
 
 const customFontsEnabled = resolveFontMode(siteConfig) === "custom";
 

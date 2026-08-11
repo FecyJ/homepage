@@ -1,7 +1,7 @@
-import { execSync } from "child_process";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { loadEnv } from "./load-env.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,7 +12,7 @@ loadEnv();
 console.log("已加载 .env 配置文件\n");
 
 // 从环境变量读取配置
-const ENABLE_CONTENT_SYNC = process.env.ENABLE_CONTENT_SYNC !== "false"; // 默认启用
+const ENABLE_CONTENT_SYNC = process.env.ENABLE_CONTENT_SYNC === "true"; // 仅显式设置 true 时启用
 const CONTENT_REPO_URL = process.env.CONTENT_REPO_URL || "";
 const CONTENT_DIR = process.env.CONTENT_DIR || path.join(rootDir, "content");
 
@@ -34,16 +34,13 @@ if (!fs.existsSync(CONTENT_DIR)) {
 	console.log("将使用独立仓库模式");
 
 	if (!CONTENT_REPO_URL) {
-		console.warn("警告：未设置 CONTENT_REPO_URL，将使用本地内容");
-		console.log(
-			"提示：请设置 CONTENT_REPO_URL 环境变量，或手动创建内容目录",
-		);
-		process.exit(0);
+		console.error("错误：启用内容同步后必须设置 CONTENT_REPO_URL");
+		process.exit(1);
 	}
 
 	try {
 		console.log(`正在克隆内容仓库：${CONTENT_REPO_URL}`);
-		execSync(`git clone --depth 1 ${CONTENT_REPO_URL} ${CONTENT_DIR}`, {
+		execFileSync("git", ["clone", "--depth", "1", CONTENT_REPO_URL, CONTENT_DIR], {
 			stdio: "inherit",
 			cwd: rootDir,
 		});
@@ -57,35 +54,36 @@ if (!fs.existsSync(CONTENT_DIR)) {
 
 	if (fs.existsSync(path.join(CONTENT_DIR, ".git"))) {
 		try {
-			console.log("正在同步远程内容（强制模式）...");
+			const superproject = execFileSync(
+				"git",
+				["rev-parse", "--show-superproject-working-tree"],
+				{ cwd: CONTENT_DIR, encoding: "utf8" },
+			).trim();
 
-			// 1. 防止本地修改丢失
-			execSync("git stash push --include-untracked -m 'auto-sync'", {
-				stdio: "inherit",
-				cwd: CONTENT_DIR,
-			});
+			if (superproject) {
+				console.log("检测到 Git Submodule，内容版本由主仓库 checkout 管理");
+			} else {
+				const changes = execFileSync("git", ["status", "--porcelain"], {
+					cwd: CONTENT_DIR,
+					encoding: "utf8",
+				}).trim();
 
-			// 2. 更新远程引用
-			execSync("git fetch --all --prune", {
-				stdio: "inherit",
-				cwd: CONTENT_DIR,
-			});
+				if (changes) {
+					throw new Error(
+						"内容仓库存在未提交修改；请先提交或暂存，再重新同步",
+					);
+				}
 
-			// 3. 判断分支
-			let branch = "main";
-			try {
-				execSync("git rev-parse --verify origin/main", { cwd: CONTENT_DIR });
-			} catch {
-				branch = "master";
+				console.log("正在以 fast-forward 模式同步远程内容...");
+				execFileSync("git", ["pull", "--ff-only"], {
+					stdio: "inherit",
+					cwd: CONTENT_DIR,
+				});
+				console.log("内容同步成功");
 			}
-
-			// 4. 强制同步
-		execSync(`git checkout ${branch}`, { cwd: CONTENT_DIR });
-		execSync(`git reset --hard origin/${branch}`, { cwd: CONTENT_DIR });
-
-		console.log(`内容同步成功（分支：${branch}）`);
 		} catch (error) {
-			console.warn("内容更新失败：", error.message);
+			console.error("内容更新失败：", error.message);
+			process.exit(1);
 		}
 	}
 }
@@ -168,33 +166,6 @@ for (const mapping of contentMappings) {
 }
 
 console.log("\n内容同步完成\n");
-try {
-	// 1. 获取 content 分支名
-	const branch = execSync("git rev-parse --abbrev-ref HEAD", {
-		cwd: CONTENT_DIR,
-	})
-		.toString()
-		.trim();
-
-	// 2. 获取 content commit hash（短）
-	const hash = execSync("git rev-parse --short HEAD", {
-		cwd: CONTENT_DIR,
-	})
-		.toString()
-		.trim();
-
-	// 3. 提交主仓库
-	execSync("git add .", { cwd: rootDir });
-
-	execSync(
-		`git commit -m "chore(content): sync ${branch}@${hash}"`,
-		{ cwd: rootDir },
-	);
-
-	console.log(`已提交内容更新（${branch}@${hash}）`);
-} catch {
-	console.log("没有变化，跳过提交");
-}
 
 // 递归复制函数
 function copyRecursive(src, dest) {

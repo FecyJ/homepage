@@ -23,8 +23,9 @@ pnpm-debug.log*
 /content/
 *.backup
 
-# config overrides synced from the content repository
-/src/config/overrides/
+# 本个人站点直接跟踪配置覆盖文件，减少与上游默认配置的冲突。
+# 若以后迁移到独立内容仓库，可重新启用下一行忽略规则。
+# /src/config/overrides/
 
 # output of `pnpm export-config`
 /overrides-export/

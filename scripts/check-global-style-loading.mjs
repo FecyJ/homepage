@@ -7,6 +7,16 @@ const projectRoot = path.resolve(
 	"..",
 );
 const distDirectory = path.join(projectRoot, "dist");
+const configuredBase = `/${(process.env.MIZUKI_BASE || "/")
+	.replace(/^\/+|\/+$/g, "")}`.replace(/^\/$/, "");
+
+function stripConfiguredBase(pathname) {
+	if (!configuredBase) return pathname;
+	if (pathname === configuredBase) return "/";
+	return pathname.startsWith(`${configuredBase}/`)
+		? pathname.slice(configuredBase.length)
+		: pathname;
+}
 
 function getAttribute(tag, name) {
 	const match = tag.match(
@@ -36,7 +46,9 @@ async function loadPageStyles(htmlPath) {
 
 	const linkedStyles = await Promise.all(
 		stylesheetUrls.map(async (stylesheetUrl) => {
-			const pathname = decodeURIComponent(stylesheetUrl.split(/[?#]/, 1)[0]);
+			const pathname = stripConfiguredBase(
+				decodeURIComponent(stylesheetUrl.split(/[?#]/, 1)[0]),
+			);
 			if (
 				/^(?:[a-z]+:)?\/\//i.test(pathname) ||
 				pathname.startsWith("data:")

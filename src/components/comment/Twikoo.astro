@@ -10,16 +10,17 @@ const config = {
 	el: "#tcomment",
 	path: Astro.props.path,
 };
+const twikooScriptUrl = `${import.meta.env.BASE_URL}assets/js/twikoo.all.min.js`;
 ---
 
 <div id="twikoo-container" class="twikoo-container">
 	<div id="tcomment"></div>
 </div>
 
-<script is:inline define:vars={{ config }}>
+<script is:inline define:vars={{ config, twikooScriptUrl }}>
 	(function () {
 		const TWIKOO_CONTAINER_ID = "twikoo-container";
-		const TWIKOO_SCRIPT_URL = "/assets/js/twikoo.all.min.js";
+		const TWIKOO_SCRIPT_URL = twikooScriptUrl;
 		const ROOT_MARGIN = "200px";
 
 		let observer = null;

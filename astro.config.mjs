@@ -53,6 +53,7 @@ import { resolveFontMode } from "./src/utils/fontMode.ts";
 loadEnv();
 
 const customFontsEnabled = resolveFontMode(siteConfig) === "custom";
+const deploymentBase = process.env.MIZUKI_BASE || "/";
 
 // https://astro.build/config
 export default defineConfig({
@@ -105,7 +106,7 @@ export default defineConfig({
 		: [],
 
 	site: siteConfig.siteURL,
-	base: "/",
+	base: deploymentBase,
 	trailingSlash: "always",
 	compressHTML: true,
 
@@ -248,6 +249,7 @@ export default defineConfig({
 					rehypeContentLinks,
 					{
 						siteUrl: siteConfig.siteURL,
+						pathBase: deploymentBase,
 						target: "_blank",
 						rel: ["nofollow", "noopener", "noreferrer"],
 					},
@@ -314,6 +316,7 @@ export default defineConfig({
 				[
 					rehypeMarkdownImages,
 					{
+						basePath: deploymentBase,
 						noReferrerDomains:
 							siteConfig.imageOptimization?.noReferrerDomains ?? [],
 					},

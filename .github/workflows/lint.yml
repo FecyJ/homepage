@@ -58,6 +58,7 @@ jobs:
         run: pnpm astro check
         env:
           ENABLE_CONTENT_SYNC: false
+          MIZUKI_BASE: /homepage
 
   build:
     name: Build
@@ -81,3 +82,4 @@ jobs:
         run: pnpm build
         env:
           ENABLE_CONTENT_SYNC: false
+          MIZUKI_BASE: /homepage

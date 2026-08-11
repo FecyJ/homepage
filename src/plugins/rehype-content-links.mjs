@@ -11,6 +11,15 @@ function hasProperty(properties, camelCase, htmlName) {
 	return camelCase in properties || htmlName in properties;
 }
 
+function prefixPathBase(value, pathBase) {
+	if (!value.startsWith("/") || value.startsWith("//")) return value;
+	const base = `/${String(pathBase ?? "").replace(/^\/+|\/+$/g, "")}`;
+	if (base === "/" || value === base || value.startsWith(`${base}/`)) {
+		return value;
+	}
+	return `${base}${value}`;
+}
+
 function transformAnchor(node, options) {
 	node.properties ??= {};
 	const properties = node.properties;
@@ -24,6 +33,9 @@ function transformAnchor(node, options) {
 		download: hasProperty(properties, "download", "download"),
 	});
 	properties.dataContentLinkKind = kind;
+	if (kind === "internal") {
+		properties.href = prefixPathBase(href, options.pathBase);
+	}
 
 	if (
 		kind !== "external" ||
@@ -65,6 +77,7 @@ export function rehypeContentLinks(options = {}) {
 	const normalizedOptions = {
 		siteUrl: options.siteUrl,
 		base: options.base ?? options.siteUrl,
+		pathBase: options.pathBase ?? "/",
 		internalOrigins: options.internalOrigins ?? [],
 		target: options.target ?? "_blank",
 		rel: options.rel ?? ["nofollow", "noopener", "noreferrer"],

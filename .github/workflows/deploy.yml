@@ -40,6 +40,7 @@ jobs:
         run: pnpm run build
         env:
           ENABLE_CONTENT_SYNC: false
+          MIZUKI_BASE: /homepage
           # 若启用内容分离，将上面改为 true 并配置仓库地址
           # CONTENT_REPO_URL: ${{ secrets.CONTENT_REPO_URL }}
       

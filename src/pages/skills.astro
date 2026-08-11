@@ -11,7 +11,7 @@ import I18nKey from "../i18n/i18nKey";
 import { i18n } from "../i18n/translation";
 
 if (!siteConfig.featurePages.skills) {
-	return Astro.redirect("/404/");
+	return Astro.redirect(`${import.meta.env.BASE_URL}404/`);
 }
 
 const categories = [...new Set(skillsData.map((skill) => skill.category))];
@@ -79,7 +79,7 @@ const subtitle = i18n(I18nKey.skillsSubtitle);
 		});
 	</script>
 
-	<script is:inline src="/js/filter-tabs-handler.js"></script>
+	<script is:inline src={`${import.meta.env.BASE_URL}js/filter-tabs-handler.js`}></script>
 
 	<div
 		class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32"

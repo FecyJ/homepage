@@ -8,6 +8,7 @@ interface Props {
 }
 
 const { posts, currentPostId, isEmpty }: Props = $props();
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 function formatDate(dateStr: string): string {
 	const [, m, d] = dateStr.split("-");
@@ -51,7 +52,7 @@ function getDateClass(isCurrentPost: boolean): string {
 			{#each posts as post (post.id)}
 				{@const isCurrentPost = post.id === currentPostId}
 				<a
-					href="/posts/{post.id}/"
+					href={`${base}/posts/${post.id}/`}
 					class={getContainerClass(isCurrentPost)}
 				>
 					<span class={getTitleClass(isCurrentPost)}

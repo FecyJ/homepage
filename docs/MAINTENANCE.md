@@ -22,6 +22,7 @@ pnpm check-env
 ENABLE_CONTENT_SYNC=false
 CONTENT_DIR=./content
 MIZUKI_FONT_MODE=system
+MIZUKI_BASE=/
 ```
 
 确认基础站点稳定后，如需主题自带字体，再把字体模式改为 `custom`。
@@ -37,7 +38,7 @@ MIZUKI_FONT_MODE=system
 5. `src/content/posts/`：文章。
 6. `src/data/`：项目、技能、时间线等结构化页面数据。
 
-正式部署前必须把 `siteConfig.ts` 覆盖文件中的 `siteURL` 从 `http://localhost:4321/` 改成最终 HTTPS 域名，并以 `/` 结尾。
+当前部署地址配置为 `https://fecyj.github.io/homepage/`，CI 构建时使用 `MIZUKI_BASE=/homepage`。如果以后绑定独立域名，请把 `siteURL` 改为新域名，并把 CI 中的 `MIZUKI_BASE` 改为 `/`。
 
 ## 日常验证
 

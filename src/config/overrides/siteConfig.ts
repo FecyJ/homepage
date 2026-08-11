@@ -9,7 +9,7 @@ import type { DeepPartial, SiteConfig } from "../../types/config";
 export default {
 	title: "我的个人网站",
 	subtitle: "记录学习、项目与生活",
-	siteURL: "http://localhost:3000/",
+	siteURL: "https://fecyj.github.io/homepage/",
 	siteStartDate: "2026-08-11",
 	timeZone: "Asia/Shanghai",
 	lang: "zh_CN",

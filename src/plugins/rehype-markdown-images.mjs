@@ -22,6 +22,21 @@ function hasNoEnhance(node) {
 	);
 }
 
+function prefixPathBase(value, basePath) {
+	if (
+		typeof value !== "string" ||
+		!value.startsWith("/") ||
+		value.startsWith("//")
+	) {
+		return value;
+	}
+	const base = `/${String(basePath ?? "").replace(/^\/+|\/+$/g, "")}`;
+	if (base === "/" || value === base || value.startsWith(`${base}/`)) {
+		return value;
+	}
+	return `${base}${value}`;
+}
+
 function shouldSkipEnhancement(ancestors, image) {
 	return [...ancestors, image].some(
 		(node) =>
@@ -95,6 +110,7 @@ function onlyImageChild(node) {
 function enhanceImage(image, ancestors, options) {
 	image.properties ??= {};
 	const properties = image.properties;
+	properties.src = prefixPathBase(properties.src, options.basePath);
 	properties.loading ??= "lazy";
 	properties.decoding ??= "async";
 
@@ -141,6 +157,13 @@ function transformChildren(parent, ancestors, options) {
 			continue;
 		}
 
+		if (child.tagName === "a" && child.properties) {
+			child.properties.href = prefixPathBase(
+				child.properties.href,
+				options.basePath,
+			);
+		}
+
 		if (child.tagName === "p") {
 			const image = onlyImageChild(child);
 			if (image) {
@@ -167,6 +190,7 @@ function transformChildren(parent, ancestors, options) {
  */
 export function rehypeMarkdownImages(options = {}) {
 	const normalizedOptions = {
+		basePath: options.basePath ?? "/",
 		noReferrerDomains: Array.isArray(options.noReferrerDomains)
 			? options.noReferrerDomains
 			: [],

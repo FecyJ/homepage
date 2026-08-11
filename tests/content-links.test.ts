@@ -84,4 +84,21 @@ describe("shared content link classification", () => {
 		assert.equal(tree.children[0].properties.dataContentLinkKind, "internal");
 		assert.equal(tree.children[0].properties.target, undefined);
 	});
+
+	it("prefixes root-relative links for project deployments", () => {
+		const tree = {
+			type: "root",
+			children: [
+				{
+					type: "element",
+					tagName: "a",
+					properties: { href: "/about/" },
+					children: [],
+				},
+			],
+		};
+
+		rehypeContentLinks({ siteUrl, pathBase: "/blog" })(tree);
+		assert.equal(tree.children[0].properties.href, "/blog/about/");
+	});
 });

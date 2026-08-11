@@ -207,6 +207,33 @@ describe("Markdown AST enhancements", () => {
 		assert.equal(tree.children[1].children.length, 1);
 	});
 
+	it("prefixes project deployment paths for local images and galleries", () => {
+		const image = {
+			type: "element",
+			tagName: "img",
+			properties: { src: "/images/example.webp", alt: "Example" },
+			children: [],
+		};
+		const tree = {
+			type: "root",
+			children: [
+				{
+					type: "element",
+					tagName: "a",
+					properties: { href: "/images/example.webp" },
+					children: [image],
+				},
+			],
+		};
+
+		rehypeMarkdownImages({ basePath: "/homepage" })(tree);
+		assert.equal(
+			tree.children[0].properties.href,
+			"/homepage/images/example.webp",
+		);
+		assert.equal(image.properties.src, "/homepage/images/example.webp");
+	});
+
 	it("matches only valid HTTP image host patterns", () => {
 		assert.equal(
 			matchesNoReferrerDomain("https://i.hdslb.com/a.webp", ["*.hdslb.com"]),

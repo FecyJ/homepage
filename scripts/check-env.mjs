@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { loadEnv } from "./load-env.js";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const minimumNode = [22, 12, 0];
+const minimumNode = [22, 13, 0];
 const currentNode = process.versions.node.split(".").map(Number);
 
 function isAtLeast(current, minimum) {
